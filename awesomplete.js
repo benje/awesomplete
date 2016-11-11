@@ -239,16 +239,25 @@ _.prototype = {
 
 			this.suggestions = this._list
 				.map(function(item) {
-					return new Suggestion(me.data(item, value));
-				})
-				.filter(function(item) {
-					return me.filter(item, value);
-				})
-				.sort(this.sort)
-				.slice(0, this.maxItems);
+					// return new Suggestion(me.data(item, value));
 
-			this.suggestions.forEach(function(text) {
-					me.ul.appendChild(me.item(text, value));
+					// TODO: Add in 'query_params' to Suggestion
+					return new Suggestion(
+			    			{label: item.label,
+			    			 value: item.value,
+			    			 category: item.category
+			    			});
+				});
+
+				// TODO: Check filtering and slice functions
+				// .filter(function(item) {
+				// 	return me.filter(item, value);
+				// })
+				// .sort(this.sort)
+				// .slice(0, this.maxItems);
+
+			this.suggestions.forEach(function(item) {
+					me.ul.appendChild(me.item(item, value, item.category));
 				});
 
 			if (this.ul.children.length === 0) {
@@ -283,8 +292,9 @@ _.SORT_BYLENGTH = function (a, b) {
 	return a < b? -1 : 1;
 };
 
-_.ITEM = function (text, input) {
-	var html = input.trim() === '' ? text : text.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>");
+_.ITEM = function (text, input, category) {
+	var cat_span = '<span class="category">' + category + '</span>';
+	var html = input.trim() === '' ? text : cat_span + text.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>");
 	return $.create("li", {
 		innerHTML: html,
 		"aria-selected": "false"
@@ -299,13 +309,37 @@ _.DATA = function (item/*, input*/) { return item; };
 
 // Private functions
 
+/**
+ * Suggestion object
+ * @param {Object} data - takes {'label': xx, 'value': xx, 'category': xx}
+ */
 function Suggestion(data) {
-	var o = Array.isArray(data)
-	  ? { label: data[0], value: data[1] }
-	  : typeof data === "object" && "label" in data && "value" in data ? data : { label: data, value: data };
+	// var o = Array.isArray(data)
+	//   ? { label: data[0], value: data[1] }
+	//   : typeof data === "object" && "label" in data && "value" in data ? data : { label: data, value: data };
+	
+	if (typeof data !== "object") {
+		console.error('Suggestion only accept Object type');
+		return;
+	} 
+
+	// Always return a category
+	var cat_name = '';
+	if ('category' in data) {
+		cat_name = data.category;
+	} else {
+		cat_name = '';
+	}
+
+	var o = {
+		label: data.label,
+		value: data.value,
+		category: cat_name 
+	};
 
 	this.label = o.label || o.value;
 	this.value = o.value;
+	this.category = o.category;
 }
 Object.defineProperty(Suggestion.prototype = Object.create(String.prototype), "length", {
 	get: function() { return this.label.length; }
