@@ -239,22 +239,21 @@ _.prototype = {
 
 			this.suggestions = this._list
 				.map(function(item) {
-					// return new Suggestion(me.data(item, value));
-
-					// TODO: Add in 'query_params' to Suggestion
 					return new Suggestion(
 			    			{label: item.label,
 			    			 value: item.value,
-			    			 category: item.category
+			    			 category: item.category,
+			    			 meta: item.meta
 			    			});
-				});
+				})
+				.slice(0, this.maxItems);
 
 				// TODO: Check filtering and slice functions
+				// If filtering and sorting required add back in.
 				// .filter(function(item) {
 				// 	return me.filter(item, value);
 				// })
 				// .sort(this.sort)
-				// .slice(0, this.maxItems);
 
 			this.suggestions.forEach(function(item) {
 					me.ul.appendChild(me.item(item, value, item.category));
@@ -311,35 +310,29 @@ _.DATA = function (item/*, input*/) { return item; };
 
 /**
  * Suggestion object
- * @param {Object} data - takes {'label': xx, 'value': xx, 'category': xx}
+ * @param {Object} data - takes {'label': xx, 'value': xx, 'category': xx, 'meta': {xx: xx}}
  */
 function Suggestion(data) {
-	// var o = Array.isArray(data)
-	//   ? { label: data[0], value: data[1] }
-	//   : typeof data === "object" && "label" in data && "value" in data ? data : { label: data, value: data };
-	
 	if (typeof data !== "object") {
-		console.error('Suggestion only accept Object type');
+		console.error('Data is not dictionary type');
 		return;
 	} 
 
-	// Always return a category
-	var cat_name = '';
-	if ('category' in data) {
-		cat_name = data.category;
-	} else {
-		cat_name = '';
-	}
+	// Always return a category & meta dictionary
+	var cat_name = ('category' in data ? data.category : '');
+	var meta = ('meta' in data && typeof data.meta === "object" ? data.meta : {});
 
 	var o = {
 		label: data.label,
 		value: data.value,
-		category: cat_name 
+		category: cat_name,
+		meta: meta
 	};
 
 	this.label = o.label || o.value;
 	this.value = o.value;
 	this.category = o.category;
+	this.meta = o.meta;
 }
 Object.defineProperty(Suggestion.prototype = Object.create(String.prototype), "length", {
 	get: function() { return this.label.length; }
