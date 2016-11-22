@@ -256,7 +256,7 @@ _.prototype = {
 				// .sort(this.sort)
 
 			this.suggestions.forEach(function(item) {
-					me.ul.appendChild(me.item(item, value, item.category));
+					me.ul.appendChild(me.item(item, value, item.category, item.meta.additional));
 				});
 
 			if (this.ul.children.length === 0) {
@@ -291,9 +291,9 @@ _.SORT_BYLENGTH = function (a, b) {
 	return a < b? -1 : 1;
 };
 
-_.ITEM = function (text, input, category) {
+_.ITEM = function (text, input, category, additional) {
 	var cat_span = '<span class="category">' + category + '</span>';
-	var html = input.trim() === '' ? text : cat_span + text.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>");
+	var html = input.trim() === '' ? text : cat_span + '<span class="title">' + text.replace(RegExp($.regExpEscape(input.trim()), "gi"), "<mark>$&</mark>") + '</span>' + '<span class="additional">' + additional + '</span>';
 	return $.create("li", {
 		innerHTML: html,
 		"aria-selected": "false"
